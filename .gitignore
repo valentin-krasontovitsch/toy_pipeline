@@ -1,0 +1,5 @@
+*.fasta*
+*.vcf
+*.swp
+*.sqlite
+
