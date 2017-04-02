@@ -51,13 +51,28 @@ def call_variants(input_file_names, output_file_name):
                 for _, line in enumerate(input_file):
                     output_file.write(line)
 
+#    subdivide summary file by sample
 @subdivide(call_variants, formatter(), "sample.*.vcf", "sample")
 def seperate_by_sample(input_file_name, output_files, output_file_name_stem):
-   read_samples = []
-   with open(input_file_name) as input_file:
+    read_samples = []
+    with open(input_file_name) as input_file:
        for _, line in enumerate(input_file):
-           sample_id = line.split('.')[0]
+           sample_id = line.split(',')[0]
            if sample_id not in read_samples:
+               read_samples.append(sample_id)
+           with open(output_file_name_stem + "." + sample_id + ".vcf",
+                     "a") as output_file:
+               output_file.write(line)
+
+#    filter sample summaries
+@transform(seperate_by_sample, suffix(".vcf"), ".filtered.vcf")
+def filter_even(input_file_name, output_file_name):
+    with open(input_file_name) as input_file:
+        with open(output_file_name, "w") as output_file:
+            for _, line in enumerate(input_file):
+                data = int(line.split(',')[1])
+                if data % 2 == 0:
+                    output_file.write(line)
 
 
 
